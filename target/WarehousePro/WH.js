@@ -143,3 +143,34 @@ function previousImage() {
     changeHeroImage();
 
 }
+// ================= DASHBOARD STATISTICS =================
+
+async function loadDashboardStats() {
+try {
+const response = await fetch("dashboardStats");
+
+    if (!response.ok) {
+        throw new Error("Unable to load dashboard statistics");
+    }
+
+    const stats = await response.json();
+
+    document.getElementById("totalProducts").textContent = stats.products;
+    document.getElementById("totalCustomers").textContent = stats.customers;
+    document.getElementById("totalOrders").textContent = stats.orders;
+    document.getElementById("totalWarehouses").textContent = stats.warehouses;
+    document.getElementById("totalDispatches").textContent = stats.dispatches;
+
+} catch (error) {
+    console.error("Dashboard statistics error:", error);
+
+    document.querySelectorAll(".stats-container .stat-card p")
+        .forEach(element => {
+            element.textContent = "Unavailable";
+        });
+}
+
+
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboardStats);

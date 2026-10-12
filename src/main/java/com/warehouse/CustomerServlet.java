@@ -76,10 +76,10 @@ public class CustomerServlet extends HttpServlet {
                          HttpServletResponse response)
             throws ServletException, IOException {
 
-        String sql = "SELECT customer_id, customer_name, " +
-                     "email, phone, address, created_at " +
-                     "FROM customers " +
-                     "ORDER BY customer_id DESC";
+       String sql = "SELECT customer_id, customer_name, " +
+             "email, phone, address, created_at " +
+             "FROM customers " +
+             "ORDER BY customer_id ASC";
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

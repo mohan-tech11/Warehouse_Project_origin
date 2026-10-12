@@ -627,6 +627,7 @@ a{
     color: white;
     border-color: #2563eb;
     transform: translateY(-2px);
+    transition: 0.2s;
     box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
 }
 }

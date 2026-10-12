@@ -1,4 +1,11 @@
+com\warehouse\DispatchServlet.class
+com\warehouse\LoginServlet.class
+com\warehouse\ProductServlet.class
+com\warehouse\SignupServlet.class
+com\warehouse\WarehouseServlet.class
 com\warehouse\TestConnection.class
 com\warehouse\DBConnection.class
-com\warehouse\LoginServlet.class
-com\warehouse\SignupServlet.class
+com\warehouse\OrderServlet.class
+com\warehouse\InventoryServlet.class
+com\warehouse\CustomerServlet.class
+com\warehouse\DashboardServlet.class

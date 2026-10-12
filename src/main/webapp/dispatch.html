@@ -1,84 +1,55 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dispatch - WarehousePro</title>
 
     <link rel="stylesheet" href="style.css">
-
 </head>
 
-
 <body>
-
 
 <header class="navbar">
 
     <div class="logo">
-
         <div class="logo-icon">📦</div>
 
         <span>
             Warehouse<span class="blue">Pro</span>
         </span>
-
     </div>
 
-
     <nav>
-
         <a href="warehouse.html">Home</a>
-
         <a href="products.html">Products</a>
-
         <a href="orders.html">Orders</a>
-
         <a href="inventory.html">Inventory</a>
-
         <a href="customers.html">Customers</a>
-
         <a href="warehouses.html">Warehouses</a>
-
-        <a href="dispatch.html" class="active">
-            Dispatch
-        </a>
-
+        <a href="dispatch.html" class="active">Dispatch</a>
     </nav>
 
-
-    <a href="login.html" class="login-btn">
-        👤logout
-    </a>
+    <a href="login.html" class="login-btn">👤 Logout</a>
 
 </header>
 
-
-
 <main class="page">
-
 
     <div class="page-header">
 
         <div>
-
             <h1>Dispatch</h1>
-
-            <p>
-                Manage package dispatch and shipments.
-            </p>
-
+            <p>Manage package dispatch and shipments.</p>
         </div>
 
-
         <button
+            type="button"
             class="primary-btn"
-            onclick="showForm('dispatchForm')">
+            onclick="openDispatchForm()">
 
             + Add Dispatch
 
@@ -86,72 +57,59 @@
 
     </div>
 
+    <div class="form-box hidden" id="dispatchForm">
 
+        <h2 id="dispatchFormTitle">Add Dispatch</h2>
 
-    <div
-        class="form-box hidden"
-        id="dispatchForm">
-
-        <h2>Add Dispatch</h2>
-
-
-        <form onsubmit="addDispatch(event)">
-
+        <form id="dispatchFormElement" onsubmit="addDispatch(event)">
 
             <input
-                type="number"
-                id="dispatchOrder"
-                placeholder="Order ID"
-                required
-            >
+                type="hidden"
+                id="dispatchId">
 
+            <label for="dispatchOrder">Order</label>
+
+            <select id="dispatchOrder" required>
+                <option value="">Select Order</option>
+            </select>
+
+            <label for="dispatchCarrier">Delivery Carrier</label>
 
             <input
                 type="text"
                 id="dispatchCarrier"
                 placeholder="Delivery Carrier"
-                required
-            >
+                required>
 
+            <label for="dispatchTracking">Tracking Number</label>
 
             <input
                 type="text"
                 id="dispatchTracking"
                 placeholder="Tracking Number"
-                required
-            >
+                required>
 
+            <label for="dispatchStatus">Dispatch Status</label>
 
-            <select id="dispatchStatus">
-
-                <option value="Ready">
-                    Ready
-                </option>
-
-                <option value="Shipped">
-                    Shipped
-                </option>
-
-                <option value="Delivered">
-                    Delivered
-                </option>
-
+            <select id="dispatchStatus" required>
+                <option value="Ready">Ready</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
             </select>
 
-
             <button
+                type="submit"
                 class="primary-btn"
-                type="submit">
+                id="dispatchSaveButton">
 
                 Save Dispatch
 
             </button>
 
-
             <button
                 type="button"
                 class="cancel-btn"
-                onclick="hideForm('dispatchForm')">
+                onclick="closeDispatchForm()">
 
                 Cancel
 
@@ -161,44 +119,27 @@
 
     </div>
 
-
-
     <div class="table-box">
 
         <h2>Dispatch List</h2>
 
-
         <table>
 
             <thead>
-
                 <tr>
-
                     <th>ID</th>
-
                     <th>Order ID</th>
-
                     <th>Carrier</th>
-
                     <th>Tracking</th>
-
                     <th>Status</th>
-
                     <th>Action</th>
-
                 </tr>
-
             </thead>
-
 
             <tbody id="dispatchTable">
 
                 <tr>
-
-                    <td colspan="6">
-                        Loading dispatches...
-                    </td>
-
+                    <td colspan="6">Loading dispatches...</td>
                 </tr>
 
             </tbody>
@@ -207,17 +148,19 @@
 
     </div>
 
-
 </main>
-
 
 <script src="app.js"></script>
 
 <script>
-    loadDispatches();
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof loadDispatches === "function") {
+            loadDispatches();
+        } else {
+            console.error("loadDispatches() is missing from app.js");
+        }
+    });
 </script>
 
 
-</body>
 
-</html>

@@ -1,204 +1,169 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory - WarehousePro</title>
-
     <link rel="stylesheet" href="style.css">
-
 </head>
-
 
 <body>
 
-
 <header class="navbar">
 
-    <div class="logo">
+<div class="logo">
+    <div class="logo-icon">📦</div>
+    <span>Warehouse<span class="blue">Pro</span></span>
+</div>
 
-        <div class="logo-icon">📦</div>
+<nav>
+    <a href="warehouse.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="orders.html">Orders</a>
+    <a href="inventory.html" class="active">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="warehouses.html">Warehouses</a>
+    <a href="dispatch.html">Dispatch</a>
+</nav>
 
-        <span>
-            Warehouse<span class="blue">Pro</span>
-        </span>
-
-    </div>
-
-
-    <nav>
-
-        <a href="warehouse.html">Home</a>
-
-        <a href="products.html">Products</a>
-
-        <a href="orders.html">Orders</a>
-
-        <a href="inventory.html" class="active">
-            Inventory
-        </a>
-
-        <a href="customers.html">Customers</a>
-
-        <a href="warehouses.html">Warehouses</a>
-
-        <a href="dispatch.html">Dispatch</a>
-
-    </nav>
-
-
-    <a href="login.html" class="login-btn">
-        👈logout
-    </a>
+<a href="login.html" class="login-btn">👤 Logout</a>
 
 </header>
 
-
-
 <main class="page">
 
+<div class="page-header">
+    <div>
+        <h1>Inventory</h1>
+        <p>Track your warehouse stock.</p>
+    </div>
 
-    <div class="page-header">
+    <button
+        class="primary-btn"
+        type="button"
+        onclick="showForm('inventoryForm')">
+        + Add Stock
+    </button>
+</div>
 
-        <div>
+<div class="form-box hidden" id="inventoryForm">
 
-            <h1>Inventory</h1>
+    <h2>Add Inventory</h2>
 
-            <p>
-                Track your warehouse stock.
-            </p>
+<form action="inventory" method="post" id="addInventoryForm">
+        <select name="productId" id="inventoryProduct" required>
+            <option value="">Loading products...</option>
+        </select>
 
-        </div>
+        <input
+            type="number"
+            name="quantity"
+            id="inventoryQuantity"
+            placeholder="Quantity"
+            min="1"
+            required>
 
+        <select name="warehouseId" id="inventoryLocation" required>
+            <option value="">Loading warehouses...</option>
+        </select>
 
-        <button
-            class="primary-btn"
-            onclick="showForm('inventoryForm')">
-
-            + Add Stock
-
+        <button class="primary-btn" type="submit">
+            Save Inventory
         </button>
 
-    </div>
+        <button
+            type="button"
+            class="cancel-btn"
+            onclick="hideForm('inventoryForm')">
+            Cancel
+        </button>
 
+    </form>
 
+</div>
 
-    <div
-        class="form-box hidden"
-        id="inventoryForm">
+<div class="table-box">
 
-        <h2>Add Inventory</h2>
+    <h2>Inventory List</h2>
 
+    <!-- Search Inventory -->
+    <input
+        type="search"
+        id="inventorySearch"
+        placeholder="Search by product or warehouse..."
+        aria-label="Search inventory"
+        style="width:100%; max-width:450px; padding:12px; margin:15px 0;">
 
-        <form onsubmit="addInventory(event)">
+    <p style="color:#d97706;">
+        ⚠️ Stock quantities of 10 or less will be highlighted.
+    </p>
 
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
 
-            <input
-                type="text"
-                id="inventoryProduct"
-                placeholder="Product Name"
-                required
-            >
+        <tbody id="inventoryTable">
+            <tr>
+                <td colspan="5">Loading inventory...</td>
+            </tr>
+        </tbody>
+    </table>
 
-
-            <input
-                type="number"
-                id="inventoryQuantity"
-                placeholder="Quantity"
-                required
-            >
-
-
-            <input
-                type="text"
-                id="inventoryLocation"
-                placeholder="Storage Location"
-                required
-            >
-
-
-            <button
-                class="primary-btn"
-                type="submit">
-
-                Save Inventory
-
-            </button>
-
-
-            <button
-                type="button"
-                class="cancel-btn"
-                onclick="hideForm('inventoryForm')">
-
-                Cancel
-
-            </button>
-
-        </form>
-
-    </div>
-
-
-
-    <div class="table-box">
-
-        <h2>Inventory List</h2>
-
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>ID</th>
-
-                    <th>Product</th>
-
-                    <th>Quantity</th>
-
-                    <th>Location</th>
-
-                    <th>Action</th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody id="inventoryTable">
-
-                <tr>
-
-                    <td colspan="5">
-                        Loading inventory...
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </div>
-
+</div>
 
 </main>
-
 
 <script src="app.js"></script>
 
 <script>
     loadInventory();
+    loadInventoryProducts();
+    loadInventoryWarehouses();
+
+    document.getElementById("addInventoryForm")
+        .addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const form = this;
+            const data = new FormData(form);
+
+            data.append("action", "add");
+
+            fetch("inventory", {
+                method: "POST",
+                body: new URLSearchParams(data)
+            })
+            .then(function(response) {
+                return response.json().then(function(result) {
+                    if (!response.ok) {
+                        throw new Error(result.message || "Unable to add stock.");
+                    }
+
+                    return result;
+                });
+            })
+            .then(function(result) {
+                alert(result.message);
+
+                form.reset();
+
+                hideForm("inventoryForm");
+
+                loadInventory();
+            })
+            .catch(function(error) {
+                console.error("Add stock error:", error);
+                alert(error.message || "Unable to add stock.");
+            });
+        });
 </script>
-
-
-</body>
-
-</html>

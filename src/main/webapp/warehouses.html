@@ -53,7 +53,7 @@
 
 
     <a href="login.html" class="login-btn">
-        👈logout
+       👤 logout
     </a>
 
 </header>
@@ -95,52 +95,37 @@
         <h2>Add Warehouse</h2>
 
 
-        <form onsubmit="addWarehouse(event)">
+<form action="warehouses" method="post">
+
+<input
+    type="text"
+    name="warehouseName"
+    placeholder="Warehouse Name"
+    required
+>
+
+<input
+    type="text"
+    name="location"
+    id="warehouseLocation"
+    placeholder="Location"
+    required
+>
+
+<button class="primary-btn" type="submit">
+    Save Warehouse
+</button>
+
+<button
+    type="button"
+    class="cancel-btn"
+    onclick="hideForm('warehouseForm')">
+    Cancel
+</button>
 
 
-            <input
-                type="text"
-                id="warehouseName"
-                placeholder="Warehouse Name"
-                required
-            >
+</form>
 
-
-            <input
-                type="text"
-                id="warehouseLocation"
-                placeholder="Location"
-                required
-            >
-
-
-            <input
-                type="number"
-                id="warehouseCapacity"
-                placeholder="Capacity"
-                required
-            >
-
-
-            <button
-                class="primary-btn"
-                type="submit">
-
-                Save Warehouse
-
-            </button>
-
-
-            <button
-                type="button"
-                class="cancel-btn"
-                onclick="hideForm('warehouseForm')">
-
-                Cancel
-
-            </button>
-
-        </form>
 
     </div>
 

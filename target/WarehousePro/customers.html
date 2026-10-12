@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Customers - WarehousePro</title>
+    <title>Customers -- WarehousePro</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -53,7 +53,7 @@
 
 
     <a href="login.html" class="login-btn">
-        👈logout
+        👤logout
     </a>
 
 </header>
@@ -95,60 +95,54 @@
         <h2>Add Customer</h2>
 
 
-        <form onsubmit="addCustomer(event)">
+<form action="addCustomer" method="post">
 
+    <input
+        type="text"
+        name="customerName"
+        placeholder="Customer Name"
+        required
+    >
 
-            <input
-                type="text"
-                id="customerName"
-                placeholder="Customer Name"
-                required
-            >
+    <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        required
+    >
 
+    <input
+        type="text"
+        name="phone"
+        placeholder="Phone Number"
+        required
+    >
 
-            <input
-                type="email"
-                id="customerEmail"
-                placeholder="Email"
-                required
-            >
+    <input
+        type="text"
+        name="address"
+        placeholder="Address"
+        required
+    >
 
+    <button
+        class="primary-btn"
+        type="submit">
 
-            <input
-                type="text"
-                id="customerPhone"
-                placeholder="Phone Number"
-                required
-            >
+        Save Customer
 
+    </button>
 
-            <input
-                type="text"
-                id="customerAddress"
-                placeholder="Address"
-                required
-            >
+    <button
+        type="button"
+        class="cancel-btn"
+        onclick="hideForm('customerForm')">
 
+        Cancel
 
-            <button
-                class="primary-btn"
-                type="submit">
+    </button>
 
-                Save Customer
-
-            </button>
-
-
-            <button
-                type="button"
-                class="cancel-btn"
-                onclick="hideForm('customerForm')">
-
-                Cancel
-
-            </button>
-
-        </form>
+</form>
 
     </div>
 

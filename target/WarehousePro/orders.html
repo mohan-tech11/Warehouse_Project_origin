@@ -51,7 +51,7 @@
 
 
     <a href="login.html" class="login-btn">
-        👈logout
+        👤logout
     </a>
 
 </header>
@@ -93,61 +93,58 @@
         <h2>Create Order</h2>
 
 
-        <form onsubmit="addOrder(event)">
+   <form action="addOrder" method="post">
 
+    <select name="customerId" id="orderCustomer" required>
 
-            <input
-                type="text"
-                id="orderCustomer"
-                placeholder="Customer Name"
-                required
-            >
+    <option value="">
+        Select Customer
+    </option>
 
+</select>
 
-            <input
-                type="number"
-                id="orderAmount"
-                placeholder="Order Amount"
-                required
-            >
+    <input
+        type="number"
+        name="totalAmount"
+        placeholder="Order Amount"
+        step="0.01"
+        required
+    >
 
+    <select name="status">
 
-            <select id="orderStatus">
+        <option value="Pending">
+            Pending
+        </option>
 
-                <option value="Pending">
-                    Pending
-                </option>
+        <option value="Processing">
+            Processing
+        </option>
 
-                <option value="Processing">
-                    Processing
-                </option>
+        <option value="Completed">
+            Completed
+        </option>
 
-                <option value="Completed">
-                    Completed
-                </option>
+    </select>
 
-            </select>
+    <button
+        class="primary-btn"
+        type="submit">
 
+        Save Order
 
-            <button
-                class="primary-btn"
-                type="submit">
+    </button>
 
-                Save Order
+    <button
+        type="button"
+        class="cancel-btn"
+        onclick="hideForm('orderForm')">
 
-            </button>
+        Cancel
 
+    </button>
 
-            <button
-                type="button"
-                class="cancel-btn"
-                onclick="hideForm('orderForm')">
-
-                Cancel
-
-            </button>
-
-        </form>
+</form>
 
     </div>
 
@@ -203,6 +200,7 @@
 
 <script>
     loadOrders();
+    loadCustomerDropdown();
 </script>
 
 

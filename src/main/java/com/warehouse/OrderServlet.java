@@ -71,10 +71,13 @@ public class OrderServlet extends HttpServlet {
                          HttpServletResponse response)
             throws ServletException, IOException {
 
-        String sql = "SELECT order_id, customer_id, " +
-                     "order_date, status, total_amount " +
-                     "FROM orders " +
-                     "ORDER BY order_id DESC";
+        String sql = "SELECT o.order_id, o.customer_id, " +
+             "c.customer_name, o.order_date, " +
+             "o.status, o.total_amount " +
+             "FROM orders o " +
+             "INNER JOIN customers c " +
+             "ON o.customer_id = c.customer_id " +
+             "ORDER BY o.order_id DESC";
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -102,9 +105,17 @@ public class OrderServlet extends HttpServlet {
                     .append(result.getInt("order_id"))
                     .append(",");
 
-                json.append("\"customerId\":")
-                    .append(result.getInt("customer_id"))
-                    .append(",");
+               json.append("\"customerId\":")
+    .append(result.getInt("customer_id"))
+    .append(",");
+
+json.append("\"customerName\":\"")
+    .append(
+        result.getString("customer_name")
+              .replace("\\", "\\\\")
+              .replace("\"", "\\\"")
+    )
+    .append("\",");
 
                 json.append("\"orderDate\":\"")
                     .append(result.getString("order_date"))
