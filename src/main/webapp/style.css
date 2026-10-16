@@ -631,3 +631,79 @@ a{
     box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
 }
 }
+/* ========================================
+   ORDER DETAILS POPUP
+======================================== */
+
+.order-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.order-modal.hidden {
+    display: none;
+}
+
+.order-modal-content {
+    position: relative;
+
+    width: 100%;
+    max-width: 450px;
+
+    padding: 30px;
+
+    background: #ffffff;
+    border-radius: 12px;
+
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+.order-modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #1269e3;
+}
+
+.order-modal-content p {
+    padding: 12px 0;
+    margin: 0;
+
+    border-bottom: 1px solid #eeeeee;
+
+    color: #333333;
+    overflow-wrap: anywhere;
+}
+
+.order-modal-content strong {
+    color: #111827;
+}
+
+.order-modal-content > .primary-btn {
+    margin-top: 25px;
+}
+
+.order-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 28px;
+    cursor: pointer;
+    color: #555555;
+}
+
+.order-modal-close:hover {
+    color: #1269e3;
+}

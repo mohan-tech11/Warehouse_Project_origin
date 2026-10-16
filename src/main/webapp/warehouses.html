@@ -92,14 +92,17 @@
         class="form-box hidden"
         id="warehouseForm">
 
-        <h2>Add Warehouse</h2>
+        <h2 id="warehouseFormTitle">Add Warehouse</h2>
 
 
-<form action="warehouses" method="post">
+<form id="warehouseFormElement" onsubmit="saveWarehouse(event)">
+
+<input type="hidden" name="warehouseId" id="warehouseId">
 
 <input
     type="text"
     name="warehouseName"
+    id="warehouseName"
     placeholder="Warehouse Name"
     required
 >
@@ -112,14 +115,25 @@
     required
 >
 
+<input
+    type="number"
+    name="capacity"
+    id="warehouseCapacity"
+    placeholder="Capacity"
+    aria-label="Capacity"
+    min="0"
+    step="1"
+    required
+>
+
 <button class="primary-btn" type="submit">
-    Save Warehouse
+    <span id="warehouseSaveButtonText">Save Warehouse</span>
 </button>
 
 <button
     type="button"
     class="cancel-btn"
-    onclick="hideForm('warehouseForm')">
+    onclick="closeWarehouseForm()">
     Cancel
 </button>
 
@@ -134,6 +148,14 @@
     <div class="table-box">
 
         <h2>Warehouse List</h2>
+
+        <label for="warehouseSearch">Search warehouses</label>
+        <input
+            type="search"
+            id="warehouseSearch"
+            placeholder="Search by warehouse ID, name, location, or capacity"
+            oninput="filterWarehouses(this.value)"
+        >
 
 
         <table>

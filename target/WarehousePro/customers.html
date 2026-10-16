@@ -78,7 +78,7 @@
 
         <button
             class="primary-btn"
-            onclick="showForm('customerForm')">
+            onclick="openCustomerForm()">
 
             + Add Customer
 
@@ -92,14 +92,17 @@
         class="form-box hidden"
         id="customerForm">
 
-        <h2>Add Customer</h2>
+        <h2 id="customerFormTitle">Add Customer</h2>
 
 
-<form action="addCustomer" method="post">
+<form id="customerFormElement" onsubmit="saveCustomer(event)">
+
+    <input type="hidden" name="customerId" id="customerId">
 
     <input
         type="text"
         name="customerName"
+        id="customerName"
         placeholder="Customer Name"
         required
     >
@@ -107,6 +110,7 @@
     <input
         type="email"
         name="email"
+        id="customerEmail"
         placeholder="Email"
         required
     >
@@ -114,6 +118,7 @@
     <input
         type="text"
         name="phone"
+        id="customerPhone"
         placeholder="Phone Number"
         required
     >
@@ -121,6 +126,7 @@
     <input
         type="text"
         name="address"
+        id="customerAddress"
         placeholder="Address"
         required
     >
@@ -129,14 +135,14 @@
         class="primary-btn"
         type="submit">
 
-        Save Customer
+        <span id="customerSaveButtonText">Save Customer</span>
 
     </button>
 
     <button
         type="button"
         class="cancel-btn"
-        onclick="hideForm('customerForm')">
+        onclick="closeCustomerForm()">
 
         Cancel
 
@@ -152,6 +158,13 @@
 
         <h2>Customer List</h2>
 
+        <label for="customerSearch">Search customers</label>
+        <input
+            type="search"
+            id="customerSearch"
+            placeholder="Search by name, email, phone, or address"
+            oninput="filterCustomers(this.value)"
+        >
 
         <table>
 

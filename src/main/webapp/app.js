@@ -77,6 +77,8 @@ function loadProducts() {
             `;
         });
 }
+let allOrders = [];
+
 function loadOrders() {
 
     fetch("addOrder")
@@ -84,131 +86,312 @@ function loadOrders() {
         .then(orders => {
 
             const table = document.getElementById("orderTable");
-
-            table.innerHTML = "";
-
-            if (orders.length === 0) {
-
-                table.innerHTML = `
-                    <tr>
-                        <td colspan="5">
-                            No orders found.
-                        </td>
-                    </tr>
-                `;
-
-                return;
+            if (!table) return;
+            if (!Array.isArray(orders)) {
+                throw new Error("Orders response is not a list.");
             }
 
-            orders.forEach(order => {
-
-                const row = `
-                    <tr>
-
-                        <td>${order.id}</td>
-
-                        <td>${order.customerName || "Customer #" + order.customerId}</td>
-
-                        <td>₹${order.amount}</td>
-
-                        <td>${order.status}</td>
-
-                        <td>
-                            <button type="button">
-                                View
-                            </button>
-                        </td>
-
-                    </tr>
-                `;
-
-                table.innerHTML += row;
-
-            });
-
+            allOrders = orders;
+            filterOrders(
+                document.getElementById("orderSearch")?.value || ""
+            );
         })
         .catch(error => {
-
             console.error("Error loading orders:", error);
-
-            document.getElementById("orderTable").innerHTML = `
-                <tr>
-                    <td colspan="5">
-                        Error loading orders.
-                    </td>
-                </tr>
-            `;
+            const table = document.getElementById("orderTable");
+            if (table) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5">Error loading orders.</td>
+                    </tr>
+                `;
+            }
         });
 }
 
+function filterOrders(searchText) {
+    const query = String(searchText || "").trim().toLocaleLowerCase();
+    const filteredOrders = allOrders.filter(order =>
+        [
+            order.id,
+            order.customerName || "Customer #" + order.customerId,
+            order.amount,
+            Number(order.amount).toLocaleString("en-IN"),
+            "₹" + Number(order.amount).toLocaleString("en-IN"),
+            order.status
+        ].some(value =>
+            String(value == null ? "" : value)
+                .toLocaleLowerCase()
+                .includes(query)
+        )
+    );
+
+    displayOrders(filteredOrders);
+}
+
+function displayOrders(orders) {
+    const table = document.getElementById("orderTable");
+    if (!table) return;
+    table.innerHTML = "";
+
+    if (orders.length === 0) {
+        table.innerHTML = `
+            <tr>
+                <td colspan="5">${
+                    allOrders.length === 0
+                        ? "No orders found."
+                        : "No orders match your search."
+                }</td>
+            </tr>
+        `;
+        return;
+    }
+
+    orders.forEach(order => {
+               const row = `
+    <tr>
+        <td>${order.id}</td>
+
+        <td>${order.customerName || "Customer #" + order.customerId}</td>
+
+        <td>₹${Number(order.amount).toLocaleString("en-IN")}</td>
+
+        <td>
+            <select id="status-${order.id}">
+                <option value="Pending" ${order.status === "Pending" ? "selected" : ""}>
+                    Pending
+                </option>
+
+                <option value="Processing" ${order.status === "Processing" ? "selected" : ""}>
+                    Processing
+                </option>
+
+                <option value="Completed" ${order.status === "Completed" ? "selected" : ""}>
+                    Completed
+                </option>
+            </select>
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="updateOrderStatus(${order.id})">
+                Save Status
+            </button>
+        </td>
+<td>
+    <button
+        type="button"
+        class="primary-btn"
+        onclick="viewOrder(${order.id})">
+        View
+    </button>
+
+    <button
+        type="button"
+        class="cancel-btn"
+        onclick="deleteOrder(${order.id})">
+        Delete
+    </button>
+</td>
+    </tr>
+`;
+        table.innerHTML += row;
+    });
+}
+
+
+let allCustomers = [];
 
 function loadCustomers() {
+    const table = document.getElementById("customerTable");
+    if (!table) {
+        console.error("Customer table not found.");
+        return;
+    }
 
     fetch("addCustomer")
-        .then(response => response.json())
-        .then(customers => {
-
-            const table =
-                document.getElementById("customerTable");
-
-            table.innerHTML = "";
-
-            if (customers.length === 0) {
-
-                table.innerHTML = `
-                    <tr>
-                        <td colspan="6">
-                            No customers found.
-                        </td>
-                    </tr>
-                `;
-
-                return;
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error("HTTP error: " + response.status);
             }
-
-            customers.forEach(customer => {
-
-                const row = `
-                    <tr>
-
-                        <td>${customer.id}</td>
-
-                        <td>${customer.name}</td>
-
-                        <td>${customer.email}</td>
-
-                        <td>${customer.phone}</td>
-
-                        <td>${customer.address}</td>
-
-                        <td>
-                            <button type="button">
-                                View
-                            </button>
-                        </td>
-
-                    </tr>
-                `;
-
-                table.innerHTML += row;
-
-            });
-
+            return response.json();
         })
-        .catch(error => {
-
-            console.error(
-                "Error loading customers:",
-                error
+        .then(function(customers) {
+            if (!Array.isArray(customers)) {
+                throw new Error("Customers response is not a list.");
+            }
+            allCustomers = customers;
+            filterCustomers(
+                document.getElementById("customerSearch")?.value || ""
             );
+        })
+        .catch(function(error) {
+            console.error("Error loading customers:", error);
+            table.innerHTML =
+                '<tr><td colspan="6">Error loading customers.</td></tr>';
+        });
+}
 
-            document.getElementById("customerTable").innerHTML = `
-                <tr>
-                    <td colspan="6">
-                        Error loading customers.
-                    </td>
-                </tr>
-            `;
+function filterCustomers(searchText) {
+    const query = String(searchText || "").trim().toLocaleLowerCase();
+    const filteredCustomers = allCustomers.filter(function(customer) {
+        return [
+            customer.id,
+            customer.name,
+            customer.email,
+            customer.phone,
+            customer.address
+        ].some(function(value) {
+            return String(value || "").toLocaleLowerCase().includes(query);
+        });
+    });
+
+    displayCustomers(filteredCustomers);
+}
+
+function displayCustomers(customers) {
+    const table = document.getElementById("customerTable");
+    if (!table) {
+        return;
+    }
+
+    table.replaceChildren();
+
+    if (customers.length === 0) {
+        const row = table.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 6;
+        cell.textContent = allCustomers.length === 0
+            ? "No customers found."
+            : "No customers match your search.";
+        return;
+    }
+
+    customers.forEach(function(customer) {
+        const row = table.insertRow();
+        [
+            customer.id,
+            customer.name,
+            customer.email,
+            customer.phone,
+            customer.address
+        ].forEach(function(value) {
+            row.insertCell().textContent = value == null ? "" : value;
+        });
+
+        const actions = row.insertCell();
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "primary-btn";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", function() {
+            editCustomer(customer);
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "cancel-btn";
+        deleteButton.style.marginLeft = "5px";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", function() {
+            deleteCustomer(customer.id);
+        });
+
+        actions.append(editButton, deleteButton);
+    });
+}
+
+function editCustomer(customer) {
+    document.getElementById("customerId").value = customer.id;
+    document.getElementById("customerName").value = customer.name || "";
+    document.getElementById("customerEmail").value = customer.email || "";
+    document.getElementById("customerPhone").value = customer.phone || "";
+    document.getElementById("customerAddress").value = customer.address || "";
+    document.getElementById("customerFormTitle").textContent = "Edit Customer";
+    document.getElementById("customerSaveButtonText").textContent =
+        "Update Customer";
+    document.getElementById("customerForm").classList.remove("hidden");
+}
+
+function openCustomerForm() {
+    closeCustomerForm();
+    document.getElementById("customerForm").classList.remove("hidden");
+}
+
+function closeCustomerForm() {
+    document.getElementById("customerFormElement").reset();
+    document.getElementById("customerId").value = "";
+    document.getElementById("customerFormTitle").textContent = "Add Customer";
+    document.getElementById("customerSaveButtonText").textContent =
+        "Save Customer";
+    hideForm("customerForm");
+}
+
+function saveCustomer(event) {
+    event.preventDefault();
+
+    const form = document.getElementById("customerFormElement");
+    const data = new URLSearchParams(new FormData(form));
+    data.set("action", document.getElementById("customerId").value
+        ? "edit"
+        : "add");
+
+    fetch("addCustomer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data.toString()
+    })
+        .then(async function(response) {
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Unable to save customer.");
+            }
+            return result;
+        })
+        .then(function(result) {
+            alert(result.message);
+            closeCustomerForm();
+            loadCustomers();
+        })
+        .catch(function(error) {
+            console.error("Save customer error:", error);
+            alert(error.message);
+        });
+}
+
+function deleteCustomer(customerId) {
+    if (!confirm("Delete customer #" + customerId + "?")) {
+        return;
+    }
+
+    const data = new URLSearchParams({
+        action: "delete",
+        customerId: customerId
+    });
+
+    fetch("addCustomer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data.toString()
+    })
+        .then(async function(response) {
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Unable to delete customer.");
+            }
+            return result;
+        })
+        .then(function(result) {
+            alert(result.message);
+            loadCustomers();
+        })
+        .catch(function(error) {
+            console.error("Delete customer error:", error);
+            alert(error.message);
         });
 }
 
@@ -375,17 +558,54 @@ function loadWarehouses() {
             return response.json();
         })
         .then(function(warehouses) {
-            console.log("Warehouses received:", warehouses);
-
-            table.innerHTML = "";
-
-            if (!Array.isArray(warehouses) || warehouses.length === 0) {
-                table.innerHTML =
-                    '<tr><td colspan="5">No warehouses found.</td></tr>';
-                return;
+            if (!Array.isArray(warehouses)) {
+                throw new Error("Warehouses response is not a list.");
             }
+            allWarehouses = warehouses;
+            filterWarehouses(
+                document.getElementById("warehouseSearch")?.value || ""
+            );
+        })
+        .catch(function(error) {
+            console.error("Error loading warehouses:", error);
+            table.innerHTML =
+                '<tr><td colspan="5">Error loading warehouses. Check the browser console.</td></tr>';
+        });
+}
 
-            warehouses.forEach(function(warehouse) {
+let allWarehouses = [];
+
+function filterWarehouses(searchText) {
+    const query = String(searchText || "").trim().toLocaleLowerCase();
+    const filteredWarehouses = allWarehouses.filter(function(warehouse) {
+        return [
+            warehouse.warehouseId,
+            warehouse.warehouseName,
+            warehouse.location,
+            warehouse.capacity
+        ].some(function(value) {
+            return String(value == null ? "" : value)
+                .toLocaleLowerCase()
+                .includes(query);
+        });
+    });
+
+    displayWarehouses(filteredWarehouses);
+}
+
+function displayWarehouses(warehouses) {
+    const table = document.getElementById("warehouseTable");
+    if (!table) return;
+    table.innerHTML = "";
+
+    if (warehouses.length === 0) {
+        table.innerHTML = allWarehouses.length === 0
+            ? '<tr><td colspan="5">No warehouses found.</td></tr>'
+            : '<tr><td colspan="5">No warehouses match your search.</td></tr>';
+        return;
+    }
+
+    warehouses.forEach(function(warehouse) {
                 const row = document.createElement("tr");
 
                 const id = document.createElement("td");
@@ -398,20 +618,129 @@ function loadWarehouses() {
                 location.textContent = warehouse.location || "";
 
                 const capacity = document.createElement("td");
-                capacity.textContent = warehouse.capacity ?? "-";
+                capacity.textContent = warehouse.capacity;
 
                 const action = document.createElement("td");
-                action.textContent = "-";
+
+                const editButton = document.createElement("button");
+                editButton.type = "button";
+                editButton.textContent = "Edit";
+                editButton.className = "primary-btn";
+                editButton.addEventListener("click", function() {
+                    editWarehouse(
+                        warehouse.warehouseId,
+                        warehouse.warehouseName,
+                        warehouse.location,
+                        warehouse.capacity
+                    );
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "cancel-btn";
+                deleteButton.style.marginLeft = "5px";
+                deleteButton.addEventListener("click", function() {
+                    deleteWarehouse(warehouse.warehouseId);
+                });
+
+                action.append(editButton, deleteButton);
 
                 row.append(id, name, location, capacity, action);
                 table.appendChild(row);
             });
+}
+
+function editWarehouse(warehouseId, warehouseName, location, capacity) {
+    document.getElementById("warehouseId").value = warehouseId;
+    document.getElementById("warehouseName").value = warehouseName || "";
+    document.getElementById("warehouseLocation").value = location || "";
+    document.getElementById("warehouseCapacity").value = capacity;
+    document.getElementById("warehouseFormTitle").textContent = "Edit Warehouse";
+    document.getElementById("warehouseSaveButtonText").textContent =
+        "Update Warehouse";
+    document.getElementById("warehouseForm").classList.remove("hidden");
+}
+
+function closeWarehouseForm() {
+    document.getElementById("warehouseFormElement").reset();
+    document.getElementById("warehouseId").value = "";
+    document.getElementById("warehouseFormTitle").textContent =
+        "Add Warehouse";
+    document.getElementById("warehouseSaveButtonText").textContent =
+        "Save Warehouse";
+    hideForm("warehouseForm");
+}
+
+function saveWarehouse(event) {
+    event.preventDefault();
+
+    const form = document.getElementById("warehouseFormElement");
+    const data = new URLSearchParams(new FormData(form));
+    data.set("action", document.getElementById("warehouseId").value
+        ? "edit"
+        : "add");
+
+    fetch("warehouses", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data.toString()
+    })
+        .then(async function(response) {
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Unable to save warehouse.");
+            }
+
+            return result;
+        })
+        .then(function(result) {
+            alert(result.message);
+            closeWarehouseForm();
+            loadWarehouses();
         })
         .catch(function(error) {
-            console.error("Error loading warehouses:", error);
+            console.error("Save warehouse error:", error);
+            alert(error.message);
+        });
+}
 
-            table.innerHTML =
-                '<tr><td colspan="5">Error loading warehouses. Check the browser console.</td></tr>';
+function deleteWarehouse(warehouseId) {
+    if (!confirm("Delete warehouse #" + warehouseId + "?")) {
+        return;
+    }
+
+    const data = new URLSearchParams({
+        action: "delete",
+        warehouseId: warehouseId
+    });
+
+    fetch("warehouses", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data.toString()
+    })
+        .then(async function(response) {
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Unable to delete warehouse.");
+            }
+
+            return result;
+        })
+        .then(function(result) {
+            alert(result.message);
+            loadWarehouses();
+        })
+        .catch(function(error) {
+            console.error("Delete warehouse error:", error);
+            alert(error.message);
         });
 }
 
@@ -586,6 +915,8 @@ function deleteInventory(inventoryId) {
 // ========================================
 
 // Load all dispatch records
+let allDispatches = [];
+
 function loadDispatches() {
 
     fetch("dispatches")
@@ -597,23 +928,65 @@ function loadDispatches() {
             return response.json();
         })
         .then(dispatches => {
-
+            if (!Array.isArray(dispatches)) {
+                throw new Error("Dispatches response is not a list.");
+            }
+            allDispatches = dispatches;
+            filterDispatches(
+                document.getElementById("dispatchSearch")?.value || ""
+            );
+        })
+        .catch(error => {
+            console.error("Dispatch loading error:", error);
             const table = document.getElementById("dispatchTable");
-
-            if (!table) return;
-
-            table.innerHTML = "";
-
-            if (dispatches.length === 0) {
+            if (table) {
                 table.innerHTML = `
                     <tr>
-                        <td colspan="6">No dispatch records found.</td>
+                        <td colspan="6">Unable to load dispatches.</td>
                     </tr>
                 `;
-                return;
             }
+        });
+}
 
-            dispatches.forEach(item => {
+function filterDispatches(searchText) {
+    const query = String(searchText || "").trim().toLocaleLowerCase();
+    const filteredDispatches = allDispatches.filter(item =>
+        [
+            item.dispatchId,
+            item.orderId,
+            item.carrier,
+            item.trackingNumber,
+            item.status
+        ].some(value =>
+            String(value == null ? "" : value)
+                .toLocaleLowerCase()
+                .includes(query)
+        )
+    );
+
+    displayDispatches(filteredDispatches);
+}
+
+function displayDispatches(dispatches) {
+    const table = document.getElementById("dispatchTable");
+    if (!table) return;
+    table.innerHTML = "";
+
+    if (dispatches.length === 0) {
+        table.innerHTML = `
+            <tr>
+                <td colspan="6">${
+                    allDispatches.length === 0
+                        ? "No dispatch records found."
+                        : "No dispatches match your search."
+                }</td>
+            </tr>
+        `;
+        return;
+    }
+
+    dispatches.forEach(item => {
 
                 const row = document.createElement("tr");
 
@@ -645,25 +1018,6 @@ function loadDispatches() {
                 table.appendChild(row);
 
             });
-
-        })
-        .catch(error => {
-
-            console.error("Dispatch loading error:", error);
-
-            const table = document.getElementById("dispatchTable");
-
-            if (table) {
-                table.innerHTML = `
-                    <tr>
-                        <td colspan="6">
-                            Unable to load dispatches.
-                        </td>
-                    </tr>
-                `;
-            }
-
-        });
 }
 
 
@@ -929,3 +1283,296 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
 });
+
+// ========================================
+// ORDER DETAILS
+// ========================================
+
+function viewOrder(orderId) {
+
+    const modal = document.getElementById("orderDetailsModal");
+    const content = document.getElementById("orderDetailsContent");
+
+    modal.classList.remove("hidden");
+    content.textContent = "Loading order details...";
+
+    fetch("addOrder")
+        .then(function(response) {
+
+            if (!response.ok) {
+                throw new Error("Unable to fetch orders.");
+            }
+
+            return response.json();
+
+        })
+        .then(function(orders) {
+
+            const order = orders.find(function(item) {
+                return Number(item.id) === Number(orderId);
+            });
+
+            if (!order) {
+                throw new Error("Order not found.");
+            }
+
+            const details = [
+                ["Order ID", order.id],
+                ["Customer", order.customerName || "Customer #" + order.customerId],
+                ["Order Date", order.orderDate || "Not available"],
+                ["Amount", "₹" + Number(order.amount).toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })],
+                ["Status", order.status]
+            ];
+
+            content.replaceChildren();
+
+            details.forEach(function(detail) {
+
+                const row = document.createElement("p");
+                const label = document.createElement("strong");
+
+                label.textContent = detail[0] + ": ";
+
+                row.appendChild(label);
+                row.appendChild(document.createTextNode(String(detail[1])));
+
+                content.appendChild(row);
+
+            });
+
+        })
+        .catch(function(error) {
+
+            console.error("Order details error:", error);
+            content.textContent = "Unable to load order details.";
+
+        });
+
+}
+
+
+function closeOrderDetails() {
+
+    document
+        .getElementById("orderDetailsModal")
+        .classList.add("hidden");
+
+}
+
+function updateOrderStatus(orderId) {
+
+
+const dropdown = document.getElementById("status-" + orderId);
+const status = dropdown.value;
+
+const data = new URLSearchParams();
+
+data.append("action", "updateStatus");
+data.append("orderId", orderId);
+data.append("status", status);
+
+fetch("addOrder", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: data.toString()
+})
+.then(async function(response) {
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.message || "Unable to update status.");
+    }
+
+    return result;
+})
+.then(function(result) {
+
+    alert(result.message);
+    loadOrders();
+
+})
+.catch(function(error) {
+
+    console.error("Order status update error:", error);
+    alert(error.message);
+
+});
+
+
+}
+
+
+// ========================================
+// DELETE ORDER
+// ========================================
+
+
+function deleteOrder(orderId) {
+    const confirmed = confirm(
+        "Are you sure you want to permanently delete order #" + orderId + "?"
+    );
+
+    if (!confirmed) return;
+
+    const data = new URLSearchParams();
+    data.append("action", "delete");
+    data.append("orderId", orderId);
+
+    fetch("addOrder", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data.toString()
+    })
+    .then(async function(response) {
+        // Read the response as text first
+        const text = await response.text();
+
+        // Convert JSON text into an object if possible
+        let result;
+
+        try {
+            result = JSON.parse(text);
+        } catch (error) {
+            throw new Error(
+                "Server response: " + text
+            );
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                result.message || "Unable to delete order."
+            );
+        }
+
+        return result;
+    })
+    .then(function(result) {
+        alert(result.message || "Order deleted successfully.");
+        loadOrders();
+    })
+    .catch(function(error) {
+        console.error("Delete order error:", error);
+        alert(error.message);
+    });
+}
+
+
+
+
+function openDispatchForm() {
+    const form = document.getElementById("dispatchForm");
+
+    if (!form) {
+        console.error("Dispatch form element 'dispatchForm' was not found.");
+        alert("Dispatch form not found. Please check dispatch.html.");
+        return;
+    }
+
+    form.classList.remove("hidden");
+    form.reset();
+}
+
+
+// ================= DISPATCH FORM =================
+
+function openDispatchForm() {
+    const formBox = document.getElementById("dispatchForm");
+    const form = document.getElementById("dispatchFormElement");
+    const title = document.getElementById("dispatchFormTitle");
+    const saveButton = document.getElementById("dispatchSaveButton");
+
+    if (!formBox || !form) {
+        console.error("Dispatch form elements not found.");
+        alert("Unable to open dispatch form.");
+        return;
+    }
+
+    form.reset();
+
+    document.getElementById("dispatchId").value = "";
+
+    if (title) {
+        title.textContent = "Add Dispatch";
+    }
+
+    if (saveButton) {
+        saveButton.textContent = "Save Dispatch";
+    }
+
+    formBox.classList.remove("hidden");
+}
+
+
+function closeDispatchForm() {
+    const formBox = document.getElementById("dispatchForm");
+
+    if (formBox) {
+        formBox.classList.add("hidden");
+    }
+}
+
+
+
+function loadOrdersForDispatch() {
+    const orderDropdown = document.getElementById("dispatchOrder");
+
+    if (!orderDropdown) {
+        console.error("Dispatch order dropdown not found.");
+        return;
+    }
+
+    fetch("addOrder")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch orders: " + response.status);
+            }
+
+            return response.json();
+        })
+        .then(orders => {
+            orderDropdown.replaceChildren(
+                new Option("Select Order", "")
+            );
+
+            if (!Array.isArray(orders)) {
+                throw new Error("Orders response is not a list.");
+            }
+
+            const availableOrders = orders.filter(order =>
+                order && order.id != null
+            );
+
+            if (availableOrders.length === 0) {
+                orderDropdown.add(new Option("No orders available", ""));
+                return;
+            }
+
+            availableOrders.forEach(order => {
+                const customer = order.customerName ||
+                    "Customer #" + order.customerId;
+                const amount = Number(order.amount).toLocaleString("en-IN");
+                const status = order.status || "Unknown";
+                const option = new Option(
+                    "Order #" + order.id + " - " + customer +
+                    " - ₹" + amount + " (" + status + ")",
+                    order.id
+                );
+
+                orderDropdown.add(option);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading orders for dispatch:", error);
+            orderDropdown.replaceChildren(
+                new Option("Unable to load orders", "")
+            );
+        });
+}

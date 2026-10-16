@@ -69,7 +69,7 @@
 
             <label for="dispatchOrder">Order</label>
 
-            <select id="dispatchOrder" required>
+            <select id="dispatchOrder" name="dispatchOrder" required>
                 <option value="">Select Order</option>
             </select>
 
@@ -123,6 +123,14 @@
 
         <h2>Dispatch List</h2>
 
+        <label for="dispatchSearch">Search dispatches</label>
+        <input
+            type="search"
+            id="dispatchSearch"
+            placeholder="Search by dispatch ID, order ID, carrier, tracking, or status"
+            oninput="filterDispatches(this.value)"
+        >
+
         <table>
 
             <thead>
@@ -149,18 +157,26 @@
     </div>
 
 </main>
-
 <script src="app.js"></script>
-
-<script>
+   <script>
     document.addEventListener("DOMContentLoaded", function () {
         if (typeof loadDispatches === "function") {
             loadDispatches();
+        }
+
+        if (typeof loadOrdersForDispatch === "function") {
+            loadOrdersForDispatch();
         } else {
-            console.error("loadDispatches() is missing from app.js");
+            console.error("loadOrdersForDispatch() is missing from app.js");
         }
     });
+
+
+    
 </script>
 
 
+
+</body>
+</html>
 

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Warehouses - WarehousePro</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-icon">📦</div>
+
+        <span>
+            Warehouse<span class="blue">Pro</span>
+        </span>
+
+    </div>
+
+
+    <nav>
+
+        <a href="warehouse.html">Home</a>
+
+        <a href="products.html">Products</a>
+
+        <a href="orders.html">Orders</a>
+
+        <a href="inventory.html">Inventory</a>
+
+        <a href="customers.html">Customers</a>
+
+        <a href="warehouses.html" class="active">
+            Warehouses
+        </a>
+
+        <a href="dispatch.html">Dispatch</a>
+
+    </nav>
+
+
+    <a href="login.html" class="login-btn">
+       👤 logout
+    </a>
+
+</header>
+
+
+
+<main class="page">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Warehouses</h1>
+
+            <p>
+                Manage warehouse locations.
+            </p>
+
+        </div>
+
+
+        <button
+            class="primary-btn"
+            onclick="showForm('warehouseForm')">
+
+            + Add Warehouse
+
+        </button>
+
+    </div>
+
+
+
+    <div
+        class="form-box hidden"
+        id="warehouseForm">
+
+        <h2>Add Warehouse</h2>
+
+
+<form action="warehouses" method="post">
+
+<input
+    type="text"
+    name="warehouseName"
+    placeholder="Warehouse Name"
+    required
+>
+
+<input
+    type="text"
+    name="location"
+    id="warehouseLocation"
+    placeholder="Location"
+    required
+>
+
+<button class="primary-btn" type="submit">
+    Save Warehouse
+</button>
+
+<button
+    type="button"
+    class="cancel-btn"
+    onclick="hideForm('warehouseForm')">
+    Cancel
+</button>
+
+
+</form>
+
+
+    </div>
+
+
+
+    <div class="table-box">
+
+        <h2>Warehouse List</h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Name</th>
+
+                    <th>Location</th>
+
+                    <th>Capacity</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="warehouseTable">
+
+                <tr>
+
+                    <td colspan="5">
+                        Loading warehouses...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</main>
+
+
+<script src="app.js"></script>
+
+<script>
+    loadWarehouses();
+</script>
+
+
+</body>
+
+</html>

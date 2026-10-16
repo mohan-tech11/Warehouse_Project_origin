@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Customers -- WarehousePro</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-icon">📦</div>
+
+        <span>
+            Warehouse<span class="blue">Pro</span>
+        </span>
+
+    </div>
+
+
+    <nav>
+
+        <a href="warehouse.html">Home</a>
+
+        <a href="products.html">Products</a>
+
+        <a href="orders.html">Orders</a>
+
+        <a href="inventory.html">Inventory</a>
+
+        <a href="customers.html" class="active">
+            Customers
+        </a>
+
+        <a href="warehouses.html">Warehouses</a>
+
+        <a href="dispatch.html">Dispatch</a>
+
+    </nav>
+
+
+    <a href="login.html" class="login-btn">
+        👤logout
+    </a>
+
+</header>
+
+
+
+<main class="page">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Customers</h1>
+
+            <p>
+                Manage customer information.
+            </p>
+
+        </div>
+
+
+        <button
+            class="primary-btn"
+            onclick="showForm('customerForm')">
+
+            + Add Customer
+
+        </button>
+
+    </div>
+
+
+
+    <div
+        class="form-box hidden"
+        id="customerForm">
+
+        <h2>Add Customer</h2>
+
+
+<form action="addCustomer" method="post">
+
+    <input
+        type="text"
+        name="customerName"
+        placeholder="Customer Name"
+        required
+    >
+
+    <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        required
+    >
+
+    <input
+        type="text"
+        name="phone"
+        placeholder="Phone Number"
+        required
+    >
+
+    <input
+        type="text"
+        name="address"
+        placeholder="Address"
+        required
+    >
+
+    <button
+        class="primary-btn"
+        type="submit">
+
+        Save Customer
+
+    </button>
+
+    <button
+        type="button"
+        class="cancel-btn"
+        onclick="hideForm('customerForm')">
+
+        Cancel
+
+    </button>
+
+</form>
+
+    </div>
+
+
+
+    <div class="table-box">
+
+        <h2>Customer List</h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Name</th>
+
+                    <th>Email</th>
+
+                    <th>Phone</th>
+
+                    <th>Address</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="customerTable">
+
+                <tr>
+
+                    <td colspan="6">
+                        Loading customers...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</main>
+
+
+<script src="app.js"></script>
+
+<script>
+    loadCustomers();
+</script>
+
+
+</body>
+
+</html>

@@ -154,6 +154,13 @@
 
         <h2>Order List</h2>
 
+        <label for="orderSearch">Search orders</label>
+        <input
+            type="search"
+            id="orderSearch"
+            placeholder="Search by order ID, customer, amount, or status"
+            oninput="filterOrders(this.value)"
+        >
 
         <table>
 
@@ -195,6 +202,34 @@
 
 </main>
 
+<!-- ORDER DETAILS POPUP -->
+<div id="orderDetailsModal" class="order-modal hidden">
+
+    <div class="order-modal-content">
+
+        <button
+            type="button"
+            class="order-modal-close"
+            onclick="closeOrderDetails()">
+            &times;
+        </button>
+
+        <h2>Order Details</h2>
+
+        <div id="orderDetailsContent">
+            Loading order details...
+        </div>
+
+        <button
+            type="button"
+            class="primary-btn"
+            onclick="closeOrderDetails()">
+            Close
+        </button>
+
+    </div>
+
+</div>
 
 <script src="app.js"></script>
 

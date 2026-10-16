@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Sign Up - Warehouse Pro</title>
+
+    <link rel="stylesheet" href="signup.css">
+
+
+</head>
+
+
+<body class="signup-page">
+
+
+    <div class="signup-container">
+
+
+        <!-- Logo -->
+
+        <div class="signup-logo">
+
+            <div class="logo-icon">
+                                               📦
+
+            </div>
+
+            <h1>
+           Warehouse<span>Pro</span>
+            </h1>
+
+            <p>
+                Warehouse Fulfillment Management
+            </p>
+
+        </div>
+
+
+        <!-- Signup Box -->
+
+        <div class="signup-box">
+
+            <h2>Create Admin Account</h2>
+
+            <p class="subtitle">
+                Register a new warehouse administrator
+            </p>
+
+
+           <form action="signup" method="post">
+
+
+                <!-- Admin Name -->
+
+                <div class="input-group">
+
+                    <label for="adminName">
+                        Admin Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminName"
+                        name="adminName"
+                        placeholder="Enter admin name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Admin email ID -->
+
+                <div class="input-group">
+
+                    <label for="adminId">
+                        Admin email ID
+                    </label>
+                    <input
+                        type="email"
+                        id="adminEmailId"
+                        name="adminEmailId"
+                        placeholder="Enter admin email ID"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Phone Number -->
+
+                <div class="input-group">
+
+                    <label for="phone">
+                        Admin Phone Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="Enter phone number"
+                        maxlength="10"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Password -->
+
+                <div class="input-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Create Account Button -->
+
+                <button
+                    type="submit"
+                    class="create-btn">
+
+                    Create Admin Account
+
+                </button>
+
+
+                <p
+                    id="signupMessage"
+                    class="signup-message">
+                </p>
+
+
+            </form>
+
+
+            <!-- Back to Login -->
+
+            <a
+                href="login.html"
+                class="back-login">
+
+                ← Already have an account? Login
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function createAdmin(event) {
+
+            event.preventDefault();
+
+            const name =
+                document.getElementById("adminName").value;
+
+            const adminEmailId =
+                document.getElementById("adminEmailId").value;
+
+            const phone =
+                document.getElementById("phone").value;
+
+            const password =
+                document.getElementById("password").value;
+
+
+            if (phone.length !== 10) {
+
+                document.getElementById("signupMessage").textContent =
+                    "Please enter a valid 10-digit phone number.";
+
+                return;
+            }
+
+
+            document.getElementById("signupMessage").textContent =
+                "Admin account created successfully!";
+
+
+            console.log("Admin Name:", name);
+            console.log("Admin ID:", adminId);
+            console.log("Phone:", phone);
+            console.log("Password:", password);
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
+```

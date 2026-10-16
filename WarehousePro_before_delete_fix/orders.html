@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Orders - WarehousePro</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<header class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-icon">📦</div>
+
+        <span>
+            Warehouse<span class="blue">Pro</span>
+        </span>
+
+    </div>
+
+
+    <nav>
+
+        <a href="warehouse.html">Home</a>
+
+        <a href="products.html">Products</a>
+
+        <a href="orders.html" class="active">Orders</a>
+
+        <a href="inventory.html">Inventory</a>
+
+        <a href="customers.html">Customers</a>
+
+        <a href="warehouses.html">Warehouses</a>
+
+        <a href="dispatch.html">Dispatch</a>
+
+    </nav>
+
+
+    <a href="login.html" class="login-btn">
+        👤logout
+    </a>
+
+</header>
+
+
+
+<main class="page">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Orders</h1>
+
+            <p>
+                Create and manage customer orders.
+            </p>
+
+        </div>
+
+
+        <button
+            class="primary-btn"
+            onclick="showForm('orderForm')">
+
+            + Create Order
+
+        </button>
+
+    </div>
+
+
+
+    <div
+        class="form-box hidden"
+        id="orderForm">
+
+        <h2>Create Order</h2>
+
+
+   <form action="addOrder" method="post">
+
+    <select name="customerId" id="orderCustomer" required>
+
+    <option value="">
+        Select Customer
+    </option>
+
+</select>
+
+    <input
+        type="number"
+        name="totalAmount"
+        placeholder="Order Amount"
+        step="0.01"
+        required
+    >
+
+    <select name="status">
+
+        <option value="Pending">
+            Pending
+        </option>
+
+        <option value="Processing">
+            Processing
+        </option>
+
+        <option value="Completed">
+            Completed
+        </option>
+
+    </select>
+
+    <button
+        class="primary-btn"
+        type="submit">
+
+        Save Order
+
+    </button>
+
+    <button
+        type="button"
+        class="cancel-btn"
+        onclick="hideForm('orderForm')">
+
+        Cancel
+
+    </button>
+
+</form>
+
+    </div>
+
+
+
+    <div class="table-box">
+
+        <h2>Order List</h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Customer</th>
+
+                    <th>Amount</th>
+
+                    <th>Status</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="orderTable">
+
+                <tr>
+
+                    <td colspan="5">
+                        Loading orders...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</main>
+
+<!-- ORDER DETAILS POPUP -->
+<div id="orderDetailsModal" class="order-modal hidden">
+
+    <div class="order-modal-content">
+
+        <button
+            type="button"
+            class="order-modal-close"
+            onclick="closeOrderDetails()">
+            &times;
+        </button>
+
+        <h2>Order Details</h2>
+
+        <div id="orderDetailsContent">
+            Loading order details...
+        </div>
+
+        <button
+            type="button"
+            class="primary-btn"
+            onclick="closeOrderDetails()">
+            Close
+        </button>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+    loadOrders();
+    loadCustomerDropdown();
+</script>
+
+
+</body>
+
+</html>

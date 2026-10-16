@@ -1,0 +1,2 @@
+ALTER TABLE warehouses
+    ADD COLUMN capacity INT NOT NULL DEFAULT 0;

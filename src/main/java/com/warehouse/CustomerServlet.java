@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,54 +20,105 @@ public class CustomerServlet extends HttpServlet {
                            HttpServletResponse response)
             throws ServletException, IOException {
 
-        String name = request.getParameter("customerName");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-        String sql = "INSERT INTO customers " +
-                     "(customer_name, email, phone, address) " +
-                     "VALUES (?, ?, ?, ?)";
+        String action = request.getParameter("action");
+        if (action == null || action.isBlank()) {
+            action = "add";
+        }
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+        try (Connection connection = DBConnection.getConnection()) {
+            if ("add".equalsIgnoreCase(action)
+                    || "edit".equalsIgnoreCase(action)) {
+                String name = request.getParameter("customerName");
+                String email = request.getParameter("email");
+                String phone = request.getParameter("phone");
+                String address = request.getParameter("address");
 
-            statement.setString(1, name);
-            statement.setString(2, email);
-            statement.setString(3, phone);
-            statement.setString(4, address);
+                if (name == null || name.isBlank()
+                        || email == null || email.isBlank()
+                        || phone == null || phone.isBlank()
+                        || address == null || address.isBlank()) {
+                    writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                            "Name, email, phone, and address are required.");
+                    return;
+                }
 
-            int result = statement.executeUpdate();
+                boolean editing = "edit".equalsIgnoreCase(action);
+                String sql = editing
+                        ? "UPDATE customers SET customer_name = ?, email = ?, "
+                            + "phone = ?, address = ? WHERE customer_id = ?"
+                        : "INSERT INTO customers "
+                            + "(customer_name, email, phone, address) "
+                            + "VALUES (?, ?, ?, ?)";
 
-            if (result > 0) {
+                try (PreparedStatement statement =
+                             connection.prepareStatement(sql)) {
+                    statement.setString(1, name.trim());
+                    statement.setString(2, email.trim());
+                    statement.setString(3, phone.trim());
+                    statement.setString(4, address.trim());
 
-                response.sendRedirect("customers.html");
+                    int customerId = 0;
+                    if (editing) {
+                        customerId = parseCustomerId(
+                                request.getParameter("customerId"));
+                        statement.setInt(5, customerId);
+                    }
 
+                    int rows = statement.executeUpdate();
+                    if (editing && rows == 0
+                            && !customerExists(connection, customerId)) {
+                        writeError(response, HttpServletResponse.SC_NOT_FOUND,
+                                "Customer not found.");
+                        return;
+                    }
+
+                    writeMessage(response, editing
+                            ? "Customer updated successfully."
+                            : "Customer added successfully.");
+                }
+            } else if ("delete".equalsIgnoreCase(action)) {
+                int customerId = parseCustomerId(
+                        request.getParameter("customerId"));
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "DELETE FROM customers WHERE customer_id = ?")) {
+                    statement.setInt(1, customerId);
+                    if (statement.executeUpdate() == 0) {
+                        writeError(response, HttpServletResponse.SC_NOT_FOUND,
+                                "Customer not found.");
+                        return;
+                    }
+                }
+
+                writeMessage(response, "Customer deleted successfully.");
             } else {
-
-                response.getWriter().println(
-                        "Customer was not added."
-                );
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid customer action.");
             }
-
-        } catch (Exception e) {
-
+        } catch (NumberFormatException e) {
+            writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "Invalid customer ID.");
+        } catch (SQLException e) {
             e.printStackTrace();
-
-            response.setContentType("text/html");
-
-            response.getWriter().println(
-                    "<h2>Customer Error</h2>"
-            );
-
-            response.getWriter().println(
-                    "<p>" + e.getMessage() + "</p>"
-            );
-
-            response.getWriter().println(
-                    "<a href='customers.html'>Back to Customers</a>"
-            );
+            if ("delete".equalsIgnoreCase(action)
+                    && "23000".equals(e.getSQLState())) {
+                writeError(response, HttpServletResponse.SC_CONFLICT,
+                        "This customer cannot be deleted while orders reference them.");
+            } else if ("23000".equals(e.getSQLState())) {
+                writeError(response, HttpServletResponse.SC_CONFLICT,
+                        "Customer data conflicts with an existing record.");
+            } else {
+                writeError(response,
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "Database operation failed.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeError(response,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Unable to save customer.");
         }
     }
 
@@ -108,23 +160,23 @@ public class CustomerServlet extends HttpServlet {
                     .append(",");
 
                 json.append("\"name\":\"")
-                    .append(result.getString("customer_name"))
+                    .append(escapeJson(result.getString("customer_name")))
                     .append("\",");
 
                 json.append("\"email\":\"")
-                    .append(result.getString("email"))
+                    .append(escapeJson(result.getString("email")))
                     .append("\",");
 
                 json.append("\"phone\":\"")
-                    .append(result.getString("phone"))
+                    .append(escapeJson(result.getString("phone")))
                     .append("\",");
 
                 json.append("\"address\":\"")
-                    .append(result.getString("address"))
+                    .append(escapeJson(result.getString("address")))
                     .append("\",");
 
                 json.append("\"createdAt\":\"")
-                    .append(result.getString("created_at"))
+                    .append(escapeJson(result.getString("created_at")))
                     .append("\"");
 
                 json.append("}");
@@ -145,9 +197,54 @@ public class CustomerServlet extends HttpServlet {
             );
 
             response.getWriter().print(
-                    "{\"error\":\"" + e.getMessage() + "\"}"
+                    "{\"error\":\"Unable to load customers.\"}"
             );
         }
     }
-}
 
+    private boolean customerExists(Connection connection, int customerId)
+            throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT 1 FROM customers WHERE customer_id = ?")) {
+            statement.setInt(1, customerId);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next();
+            }
+        }
+    }
+
+    private int parseCustomerId(String value) {
+        if (value == null || value.isBlank()) {
+            throw new NumberFormatException("Customer ID is required.");
+        }
+        int customerId = Integer.parseInt(value);
+        if (customerId <= 0) {
+            throw new NumberFormatException("Customer ID must be positive.");
+        }
+        return customerId;
+    }
+
+    private void writeMessage(HttpServletResponse response, String message)
+            throws IOException {
+        response.getWriter().print(
+                "{\"message\":\"" + escapeJson(message) + "\"}");
+    }
+
+    private void writeError(HttpServletResponse response, int status,
+                            String message) throws IOException {
+        response.setStatus(status);
+        response.getWriter().print(
+                "{\"error\":\"" + escapeJson(message) + "\"}");
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\t", "\\t");
+    }
+}

@@ -24,7 +24,7 @@ protected void doGet(HttpServletRequest request,
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
 
-    String sql = "SELECT warehouse_id, warehouse_name, location, phone "
+    String sql = "SELECT warehouse_id, warehouse_name, location, capacity "
                + "FROM warehouses ORDER BY warehouse_id ASC";
 
     try (Connection con = DBConnection.getConnection();
@@ -47,9 +47,9 @@ protected void doGet(HttpServletRequest request,
                 .append(escapeJson(rs.getString("warehouse_name")))
                 .append("\",\"location\":\"")
                 .append(escapeJson(rs.getString("location")))
-                .append("\",\"phone\":\"")
-                .append(escapeJson(rs.getString("phone")))
-                .append("\"}");
+                .append("\",\"capacity\":")
+                .append(rs.getInt("capacity"))
+                .append("}");
 
             first = false;
         }
@@ -70,49 +70,157 @@ protected void doGet(HttpServletRequest request,
     }
 }
 
-// POST: Save a new warehouse
+// POST: Add, edit, or delete a warehouse
 @Override
 protected void doPost(HttpServletRequest request,
                      HttpServletResponse response)
         throws IOException {
 
-    String warehouseName = request.getParameter("warehouseName");
-    String location = request.getParameter("location");
-
-    response.setContentType("text/plain");
+    response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
 
-    if (warehouseName == null || warehouseName.trim().isEmpty()
-            || location == null || location.trim().isEmpty()) {
-
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.getWriter().println("Error: Warehouse name and location are required.");
-        return;
+    String action = request.getParameter("action");
+    if (action == null || action.isBlank()) {
+        action = "add";
     }
 
-    String sql = "INSERT INTO warehouses (warehouse_name, location, phone) VALUES (?, ?, ?)";
+    String warehouseName = request.getParameter("warehouseName");
+    String location = request.getParameter("location");
+    String capacityParameter = request.getParameter("capacity");
 
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+    try (Connection con = DBConnection.getConnection()) {
 
-        ps.setString(1, warehouseName.trim());
-        ps.setString(2, location.trim());
-        ps.setString(3, "");
+        if ("add".equalsIgnoreCase(action)
+                || "edit".equalsIgnoreCase(action)) {
 
-        int rows = ps.executeUpdate();
+            if (warehouseName == null || warehouseName.trim().isEmpty()
+                    || location == null || location.trim().isEmpty()
+                    || capacityParameter == null
+                    || capacityParameter.isBlank()) {
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Warehouse name, location, and capacity are required.");
+                return;
+            }
 
-        if (rows > 0) {
-            response.getWriter().println("SUCCESS: Warehouse saved successfully!");
+            int capacity;
+            try {
+                capacity = Integer.parseInt(capacityParameter);
+            } catch (NumberFormatException e) {
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Capacity must be a whole number.");
+                return;
+            }
+
+            if (capacity < 0) {
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                        "Capacity cannot be negative.");
+                return;
+            }
+
+            boolean editing = "edit".equalsIgnoreCase(action);
+            String sql = editing
+                    ? "UPDATE warehouses SET warehouse_name = ?, location = ?, "
+                        + "capacity = ? WHERE warehouse_id = ?"
+                    : "INSERT INTO warehouses "
+                        + "(warehouse_name, location, capacity) VALUES (?, ?, ?)";
+
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, warehouseName.trim());
+                ps.setString(2, location.trim());
+                ps.setInt(3, capacity);
+
+                if (editing) {
+                    int warehouseId = parseWarehouseId(
+                            request.getParameter("warehouseId"));
+                    ps.setInt(4, warehouseId);
+                }
+
+                int rows = ps.executeUpdate();
+                if (editing && rows == 0
+                        && !warehouseExists(con, parseWarehouseId(
+                                request.getParameter("warehouseId")))) {
+                    writeError(response, HttpServletResponse.SC_NOT_FOUND,
+                            "Warehouse not found.");
+                    return;
+                }
+
+                writeMessage(response, editing
+                        ? "Warehouse updated successfully."
+                        : "Warehouse added successfully.");
+            }
+        } else if ("delete".equalsIgnoreCase(action)) {
+            int warehouseId = parseWarehouseId(
+                    request.getParameter("warehouseId"));
+
+            try (PreparedStatement ps = con.prepareStatement(
+                    "DELETE FROM warehouses WHERE warehouse_id = ?")) {
+                ps.setInt(1, warehouseId);
+                if (ps.executeUpdate() == 0) {
+                    writeError(response, HttpServletResponse.SC_NOT_FOUND,
+                            "Warehouse not found.");
+                    return;
+                }
+            }
+
+            writeMessage(response, "Warehouse deleted successfully.");
         } else {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().println("ERROR: Warehouse was not inserted.");
+            writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "Invalid warehouse action.");
         }
-
-    } catch (Exception e) {
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    } catch (NumberFormatException e) {
+        writeError(response, HttpServletResponse.SC_BAD_REQUEST,
+                "Invalid warehouse ID.");
+    } catch (java.sql.SQLException e) {
         e.printStackTrace();
-        response.getWriter().println("DATABASE ERROR: " + e.getMessage());
+        if ("23000".equals(e.getSQLState())) {
+            writeError(response, HttpServletResponse.SC_CONFLICT,
+                    "This warehouse cannot be deleted while inventory records reference it.");
+        } else {
+            writeError(response,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Database operation failed.");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Unable to save warehouse.");
     }
+}
+
+private boolean warehouseExists(Connection connection, int warehouseId)
+        throws java.sql.SQLException {
+    try (PreparedStatement statement = connection.prepareStatement(
+            "SELECT 1 FROM warehouses WHERE warehouse_id = ?")) {
+        statement.setInt(1, warehouseId);
+        try (ResultSet result = statement.executeQuery()) {
+            return result.next();
+        }
+    }
+}
+
+private int parseWarehouseId(String value) {
+    if (value == null || value.isBlank()) {
+        throw new NumberFormatException("Warehouse ID is required.");
+    }
+
+    int warehouseId = Integer.parseInt(value);
+    if (warehouseId <= 0) {
+        throw new NumberFormatException("Warehouse ID must be positive.");
+    }
+    return warehouseId;
+}
+
+private void writeMessage(HttpServletResponse response, String message)
+        throws IOException {
+    response.getWriter().print(
+            "{\"message\":\"" + escapeJson(message) + "\"}");
+}
+
+private void writeError(HttpServletResponse response, int status,
+                        String message) throws IOException {
+    response.setStatus(status);
+    response.getWriter().print(
+            "{\"error\":\"" + escapeJson(message) + "\"}");
 }
 // Escape special characters before placing text in JSON.
 private String escapeJson(String value) {
@@ -130,4 +238,3 @@ private String escapeJson(String value) {
 
 
 }
-

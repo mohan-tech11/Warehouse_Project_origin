@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Products - WarehousePro</title>
+
+<link rel="stylesheet" href="style.css">
+
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+
+<div class="logo">
+    <div class="logo-icon">📦</div>
+    <span>Warehouse<span class="blue">Pro</span></span>
+</div>
+
+<nav>
+    <a href="warehouse.html">Home</a>
+    <a href="products.html" class="active">Products</a>
+    <a href="orders.html">Orders</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="warehouses.html">Warehouses</a>
+    <a href="dispatch.html">Dispatch</a>
+</nav>
+
+<a href="login.html" class="login-btn">👤 Logout</a>
+
+
+</header>
+
+<main class="page">
+
+
+<!-- PAGE HEADER -->
+
+<div class="page-header">
+
+    <div>
+        <h1>Products</h1>
+        <p>Manage your warehouse products.</p>
+    </div>
+
+    <button
+        type="button"
+        class="primary-btn"
+        onclick="showForm('productForm')">
+
+        + Add Product
+
+    </button>
+
+</div>
+
+<!-- MESSAGE -->
+
+<p id="message" role="status" aria-live="polite"></p>
+
+<!-- ADD PRODUCT FORM -->
+
+<div class="form-box hidden" id="productForm">
+
+    <h2>Add Product</h2>
+
+    <form action="addProduct" method="post" id="addProductForm">
+
+        <input
+            type="text"
+            name="productName"
+            placeholder="Product Name"
+            required>
+
+        <input
+            type="text"
+            name="sku"
+            placeholder="SKU"
+            required>
+
+        <input
+            type="text"
+            name="category"
+            placeholder="Category">
+
+        <input
+            type="number"
+            name="price"
+            placeholder="Price"
+            min="0"
+            step="0.01"
+            required>
+
+        <input
+            type="number"
+            name="quantity"
+            placeholder="Quantity"
+            min="0"
+            required>
+
+        <button class="primary-btn" type="submit">
+            Save Product
+        </button>
+
+        <button
+            type="button"
+            class="cancel-btn"
+            onclick="hideForm('productForm')">
+
+            Cancel
+
+        </button>
+
+    </form>
+
+</div>
+
+<!-- EDIT PRODUCT FORM -->
+
+<div class="form-box hidden" id="editProductForm">
+
+    <h2>Edit Product</h2>
+
+    <form id="updateProductForm">
+
+        <input type="hidden" id="editId">
+
+        <input
+            type="text"
+            id="editName"
+            placeholder="Product Name"
+            required>
+
+        <input
+            type="text"
+            id="editSku"
+            placeholder="SKU"
+            required>
+
+        <input
+            type="text"
+            id="editCategory"
+            placeholder="Category">
+
+        <input
+            type="number"
+            id="editPrice"
+            placeholder="Price"
+            min="0"
+            step="0.01"
+            required>
+
+        <input
+            type="number"
+            id="editQuantity"
+            placeholder="Quantity"
+            min="0"
+            required>
+
+        <button class="primary-btn" type="submit">
+            Update Product
+        </button>
+
+        <button
+            type="button"
+            class="cancel-btn"
+            onclick="hideForm('editProductForm')">
+
+            Cancel
+
+        </button>
+
+    </form>
+
+</div>
+
+<!-- PRODUCT LIST -->
+
+<div class="table-box">
+
+    <h2>Product List</h2>
+
+    <input
+        type="search"
+        id="productSearch"
+        placeholder="Search by product name, SKU, or category..."
+        aria-label="Search products"
+        style="width:100%; max-width:450px; padding:12px; margin:15px 0;">
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="productTable">
+
+            <tr>
+                <td colspan="7">Loading products...</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+</main>
+
+<script src="app.js"></script>
+
+<script>
+    // =========================
+    // FORM FUNCTIONS
+    // =========================
+
+    function showForm(formId) {
+        document.getElementById(formId).classList.remove("hidden");
+    }
+
+    function hideForm(formId) {
+        document.getElementById(formId).classList.add("hidden");
+    }
+
+    // =========================
+    // DISPLAY MESSAGE
+    // =========================
+
+    function showMessage(message, isError = false) {
+        const element = document.getElementById("message");
+
+        element.textContent = message;
+        element.style.color = isError ? "#c62828" : "#16803c";
+    }
+
+    // =========================
+    // LOAD PRODUCTS
+    // =========================
+
+    let allProducts = [];
+
+    async function loadProducts() {
+
+        const table = document.getElementById("productTable");
+
+        table.replaceChildren();
+
+        const loadingRow = document.createElement("tr");
+        const loadingCell = document.createElement("td");
+
+        loadingCell.colSpan = 7;
+        loadingCell.textContent = "Loading products...";
+
+        loadingRow.appendChild(loadingCell);
+        table.appendChild(loadingRow);
+
+        try {
+
+            const response = await fetch("addProduct");
+
+            if (!response.ok) {
+                throw new Error("Server returned HTTP " + response.status);
+            }
+
+            const products = await response.json();
+
+            if (!Array.isArray(products)) {
+                throw new Error("Unexpected product data received.");
+            }
+
+            allProducts = products;
+
+            displayProducts(allProducts);
+
+        } catch (error) {
+
+            console.error("Error loading products:", error);
+
+            table.replaceChildren();
+
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 7;
+            cell.textContent = "Unable to load products. Check the server.";
+
+            row.appendChild(cell);
+            table.appendChild(row);
+
+            showMessage("Failed to load products.", true);
+        }
+    }
+
+    // =========================
+    // DISPLAY PRODUCT TABLE
+    // =========================
+
+    function displayProducts(products) {
+
+        const table = document.getElementById("productTable");
+
+        table.replaceChildren();
+
+        if (products.length === 0) {
+
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 7;
+            cell.textContent = "No products found.";
+
+            row.appendChild(cell);
+            table.appendChild(row);
+
+            return;
+        }
+
+        products.forEach(product => {
+
+            const row = document.createElement("tr");
+
+            const values = [
+                product.id,
+                product.name,
+                product.sku,
+                product.category ?? "",
+                Number(product.price).toFixed(2),
+                product.quantity
+            ];
+
+            values.forEach(value => {
+
+                const cell = document.createElement("td");
+
+                cell.textContent = value;
+                row.appendChild(cell);
+
+            });
+
+            const actionCell = document.createElement("td");
+
+            const editButton = document.createElement("button");
+
+            editButton.type = "button";
+            editButton.textContent = "Edit";
+            editButton.className = "primary-btn";
+
+            editButton.addEventListener("click", () => {
+                editProduct(product.id);
+            });
+
+            const deleteButton = document.createElement("button");
+
+            deleteButton.type = "button";
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "cancel-btn";
+            deleteButton.style.marginLeft = "6px";
+
+            deleteButton.addEventListener("click", () => {
+                deleteProduct(product.id);
+            });
+
+            actionCell.appendChild(editButton);
+            actionCell.appendChild(deleteButton);
+
+            row.appendChild(actionCell);
+            table.appendChild(row);
+
+        });
+    }
+
+    // =========================
+    // SEARCH PRODUCTS
+    // =========================
+
+    document.getElementById("productSearch")
+        .addEventListener("input", function () {
+
+            const searchText = this.value.trim().toLowerCase();
+
+            const filteredProducts = allProducts.filter(product => {
+
+                return String(product.name ?? "").toLowerCase().includes(searchText)
+                    || String(product.sku ?? "").toLowerCase().includes(searchText)
+                    || String(product.category ?? "").toLowerCase().includes(searchText);
+
+            });
+
+            displayProducts(filteredProducts);
+
+        });
+
+    // =========================
+    // EDIT PRODUCT
+    // =========================
+
+    function editProduct(id) {
+
+        const product = allProducts.find(item => Number(item.id) === Number(id));
+
+        if (!product) {
+            showMessage("Product not found.", true);
+            return;
+        }
+
+        document.getElementById("editId").value = product.id;
+        document.getElementById("editName").value = product.name ?? "";
+        document.getElementById("editSku").value = product.sku ?? "";
+        document.getElementById("editCategory").value = product.category ?? "";
+        document.getElementById("editPrice").value = product.price;
+        document.getElementById("editQuantity").value = product.quantity;
+
+        showForm("editProductForm");
+
+        document.getElementById("editProductForm")
+            .scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    // =========================
+    // UPDATE PRODUCT
+    // =========================
+
+    document.getElementById("updateProductForm")
+        .addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            const product = {
+                id: Number(document.getElementById("editId").value),
+                name: document.getElementById("editName").value.trim(),
+                sku: document.getElementById("editSku").value.trim(),
+                category: document.getElementById("editCategory").value.trim(),
+                price: Number(document.getElementById("editPrice").value),
+                quantity: Number(document.getElementById("editQuantity").value)
+            };
+
+            if (!product.name || !product.sku ||
+                !Number.isFinite(product.price) || product.price < 0 ||
+                !Number.isInteger(product.quantity) || product.quantity < 0) {
+
+                showMessage("Enter valid product details.", true);
+                return;
+            }
+
+            try {
+
+                const response = await fetch("addProduct", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(product)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || "Update failed.");
+                }
+
+                hideForm("editProductForm");
+                showMessage("Product updated successfully!");
+
+                await loadProducts();
+
+            } catch (error) {
+
+                console.error("Update error:", error);
+                showMessage(error.message || "Unable to update product.", true);
+
+            }
+        });
+
+    // =========================
+    // DELETE PRODUCT
+    // =========================
+
+    async function deleteProduct(id) {
+
+        if (!confirm("Are you sure you want to delete this product?")) {
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                "addProduct?id=" + encodeURIComponent(id),
+                { method: "DELETE" }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Delete failed.");
+            }
+
+            showMessage("Product deleted successfully!");
+
+            await loadProducts();
+
+        } catch (error) {
+
+            console.error("Delete error:", error);
+            showMessage(error.message || "Unable to delete product.", true);
+
+        }
+    }
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
+    document.addEventListener("DOMContentLoaded", loadProducts);
+
+</script>
+
+</body>
+</html>

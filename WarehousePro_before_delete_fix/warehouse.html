@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>WarehousePro - Fulfillment Management</title>
+
+    <link rel="stylesheet" href="WH.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo">
+            <div class="logo-icon">◇</div>
+            <span>Warehouse<span class="blue">Pro</span></span>
+        </div>
+
+        <nav>
+            <a href="warehouse.html" class="active">Home</a>
+            <a href="products.html">Products</a>
+            <a href="orders.html">Orders</a>
+            <a href="inventory.html">Inventory</a>
+            <a href="customers.html">Customers</a>
+            <a href="warehouses.html">Warehouses</a>
+            <a href="dispatch.html">Dispatch</a>
+        </nav>
+
+        <div class="nav-right">
+
+            <button class="search-btn" onclick="searchWebsite()">
+                🔍
+            </button>
+
+            <button class="login-btn" onclick="login()">
+            👤logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero" id="home">
+
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+
+            <h1>
+                Warehouse Fulfillment
+                <br>
+                <span>Management System</span>
+            </h1>
+
+            <p>
+                Manage your warehouse operations, inventory,
+                orders, customers and dispatches — all in one place.
+            </p>
+
+            <div class="hero-buttons">
+
+                <button class="primary-btn" onclick="getStarted()">
+                    Get Started
+                    <span>→</span>
+                </button>
+
+                <button class="outline-btn" onclick="learnMore()">
+                    Learn More
+                </button>
+
+            </div>
+
+        </div>
+
+        <button class="slider left" onclick="previousImage()">
+            ‹
+        </button>
+
+        <button class="slider right" onclick="nextImage()">
+            ›
+        </button>
+
+        <div class="slider-dots">
+            <span class="dot active-dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= DASHBOARD STATISTICS ================= -->
+
+<section class="dashboard-stats">
+    <h2>Warehouse Overview</h2>
+    <p>Live statistics from your database</p>
+
+<div class="stats-container">
+
+    <div class="stat-card">
+        <h3>📦 Products</h3>
+        <p id="totalProducts">Loading...</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>👥 Customers</h3>
+        <p id="totalCustomers">Loading...</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>🛒 Orders</h3>
+        <p id="totalOrders">Loading...</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>🏢 Warehouses</h3>
+        <p id="totalWarehouses">Loading...</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>🚚 Dispatches</h3>
+        <p id="totalDispatches">Loading...</p>
+    </div>
+
+</div>
+
+</section>
+
+
+
+    <!-- ================= SERVICES ================= -->
+
+    <section class="services">
+
+        <div class="section-heading">
+
+            <h2>Our Services</h2>
+
+            <p>
+                Everything you need to manage your warehouse efficiently.
+            </p>
+
+        </div>
+
+
+        <div class="service-container">
+
+
+            <!-- Products -->
+
+            <div class="service-card products-card" id="products">
+
+                <div class="service-icon">
+                    📦
+                </div>
+
+                <h3>Products</h3>
+
+                <p>
+                    Add, update and manage your product catalog.
+                </p>
+
+                <button onclick="openProducts()">
+                    View More →
+                </button>
+
+            </div>
+
+
+            <!-- Inventory -->
+
+            <div class="service-card inventory-card" id="inventory">
+
+                <div class="service-icon">
+                    📊
+                </div>
+
+                <h3>Inventory</h3>
+
+                <p>
+                    Track stock levels and inventory movements.
+                </p>
+
+                <button onclick="openInventory()">
+                    View More →
+                </button>
+
+            </div>
+
+
+            <!-- Orders -->
+
+            <div class="service-card orders-card" id="orders">
+
+                <div class="service-icon">
+                    🛒
+                </div>
+
+                <h3>Orders</h3>
+
+                <p>
+                    Create and manage customer orders.
+                </p>
+
+                <button onclick="openOrders()">
+                    View More →
+                </button>
+
+            </div>
+
+
+            <!-- Customers -->
+
+            <div class="service-card customers-card" id="customers">
+
+                <div class="service-icon">
+                    👥
+                </div>
+
+                <h3>Customers</h3>
+
+                <p>
+                    Store and manage customer information.
+                </p>
+
+                <button onclick="openCustomers()">
+                    View More →
+                </button>
+
+            </div>
+
+
+            <!-- Warehouses -->
+
+            <div class="service-card warehouse-card" id="warehouses">
+
+                <div class="service-icon">
+                    🏢
+                </div>
+
+                <h3>Warehouses</h3>
+
+                <p>
+                    Manage multiple warehouses and locations.
+                </p>
+
+                <button onclick="openWarehouses()">
+                    View More →
+                </button>
+
+            </div>
+
+
+            <!-- Dispatch -->
+
+            <div class="service-card dispatch-card" id="dispatches">
+
+                <div class="service-icon">
+                    🚚
+                </div>
+
+                <h3>Dispatches</h3>
+
+                <p>
+                    Track packages and manage shipments.
+                </p>
+
+                <button onclick="openDispatches()">
+                    View More →
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ABOUT ================= -->
+
+    <section class="about">
+
+        <div class="about-image">
+
+            <img
+                src="https://images.unsplash.com/photo-1586528116493-da8b5f6c6f5d?auto=format&fit=crop&w=1000&q=80"
+                alt="Warehouse"
+            >
+
+        </div>
+
+
+        <div class="about-content">
+
+            <span class="small-title">
+                ABOUT US
+            </span>
+
+            <h2>
+                Smarter Warehouse Management
+                <br>
+                for a Better Tomorrow
+            </h2>
+
+            <p>
+                Our Warehouse Fulfillment Management System helps
+                businesses streamline their operations, reduce costs
+                and deliver products faster. From inventory tracking
+                to final dispatch, everything is managed efficiently
+                and in real-time.
+            </p>
+
+
+            <div class="check-list">
+
+                <div>
+                    <span>✓</span>
+                    Real-time inventory tracking
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    Efficient order management
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    Multi-warehouse support
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    Fast and reliable dispatch
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-main">
+
+            <div class="footer-logo">
+
+                <div class="logo">
+                    <div class="logo-icon">◇</div>
+
+                    <span>
+                        Warehouse<span class="blue">Pro</span>
+                    </span>
+                </div>
+
+                <p>
+                    Smart Warehouse, Better Business
+                </p>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <a href="warehouse.html">Home</a>
+                <a href="products.html">Products</a>
+                <a href="orders.html">Orders</a>
+                <a href="inventory.html">Inventory</a>
+                <a href="customers.html">Customers</a>
+                <a href="warehouses.html">Warehouses</a>
+                <a href="dispatch.html">Dispatch</a>
+
+            </div>
+
+
+            <div class="social-icons">
+
+                <span>f</span>
+                <span>𝕏</span>
+                <span>in</span>
+                <span>◎</span>
+                <span>▶</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="copyright">
+
+            © 2026 WarehousePro. All rights reserved.
+
+        </div>
+
+    </footer>
+
+
+    <script src="WH.js"></script>
+
+</body>
+</html>
